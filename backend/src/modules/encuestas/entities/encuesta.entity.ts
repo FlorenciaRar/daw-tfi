@@ -1,0 +1,29 @@
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Pregunta } from './pregunta.entity';
+import { Exclude } from 'class-transformer';
+import { Respuesta } from 'src/modules/respuestas/entities/respuesta.entity';
+
+@Entity({ name: 'encuestas' })
+export class Encuesta {
+  @PrimaryGeneratedColumn({ name: 'id_encuesta' })
+  id: number;
+
+  @Column()
+  nombre: string;
+
+  @OneToMany(() => Pregunta, (pregunta: Pregunta) => pregunta.encuesta, {
+    cascade: ['insert'],
+  })
+  preguntas: Pregunta[];
+
+  @Column({ name: 'codigo_respuesta' })
+  codigoRespuesta: string;
+
+  @Column({ name: 'codigo_resultados' })
+  @Exclude()
+  codigoResultados: string;
+
+  @OneToMany(() => Respuesta, (respuesta) => respuesta.encuesta)
+  respuestas: Respuesta[];
+  
+}

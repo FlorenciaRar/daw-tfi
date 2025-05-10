@@ -1,0 +1,29 @@
+meta {
+  name: hola
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:3000/api/v1/respuestas/13/?codigo=22835dfb-df94-4961-a6f0-ccc31d7bce2c&tipo=RESPUESTA
+  body: json
+  auth: inherit
+}
+
+params:query {
+  codigo: 22835dfb-df94-4961-a6f0-ccc31d7bce2c
+  tipo: RESPUESTA
+}
+
+body:json {
+  {
+    "respuestasAbiertas":[{
+      "texto":"aaa",
+      "idPregunta": 1
+      }
+      ],
+    "respuestasOpciones":[{
+      "idOpcion":2
+    }]
+  }
+}

@@ -1,0 +1,41 @@
+meta {
+  name: postEncuestas
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3000/api/v1/encuestas/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "nombre":"hola",
+    "preguntas":[{
+      "numero":1,
+      "texto":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tipo": "ABIERTA"
+      },
+                {
+      "numero":4,
+      "texto":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tipo": "OPCION_MULTIPLE_SELECCION_SIMPLE",
+      "opciones": [{
+        "numero":1,
+        "texto":"verdadero"
+        },
+        {
+        "numero":2,
+        "texto":"falso"
+        }
+                  ]
+      },
+                {
+      "numero":15,
+      "texto":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tipo": "ABIERTA"
+      }]
+  }
+}

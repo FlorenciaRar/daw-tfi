@@ -1,0 +1,27 @@
+meta {
+  name: updateEncuestas
+  type: http
+  seq: 2
+}
+
+patch {
+  url: http://localhost:3000/api/v1/encuestas/13/?codigo=22835dfb-df94-4961-a6f0-ccc31d7bce2c&tipo=RESPUESTA
+  body: json
+  auth: inherit
+}
+
+params:query {
+  codigo: 22835dfb-df94-4961-a6f0-ccc31d7bce2c
+  tipo: RESPUESTA
+}
+
+body:json {
+  {
+    "nombre": "la encuesta de pepe",
+    "preguntas":[{
+      "id": 1,
+      "numero": 12,
+      "texto": "aaa"
+  }]
+  }
+}
