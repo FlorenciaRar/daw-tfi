@@ -18,6 +18,10 @@ export class RespuestasController {
     @Query() dtoEncuesta: BuscarEncuestaDTO,
     @Body() dtoRespuesta: CrearRespuestaDTO,
   ): Promise<any> {
-    return await this.respuestasService.crearRespuesta(id,dtoEncuesta, dtoRespuesta);
+    return await this.respuestasService.crearRespuesta(
+      id,
+      dtoEncuesta,
+      dtoRespuesta,
+    );
   }
 }

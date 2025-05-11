@@ -10,6 +10,5 @@ export class CrearRespuestaAbiertaDTO {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  idPregunta:number;
-  
+  idPregunta: number;
 }

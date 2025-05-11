@@ -1,7 +1,7 @@
 meta {
-  name: updateEncuestas
+  name: updateEncuestas PUBLICADA
   type: http
-  seq: 2
+  seq: 6
 }
 
 patch {
@@ -17,18 +17,6 @@ params:query {
 
 body:json {
   {
-    "nombre": "La encuesta de Pepe",
-    "preguntas": [
-      {
-        "id":6,
-        "texto": "¿Cuál es tu color favorito ahora?"
-      },
-      {
-      "numero":1,
-      "texto":"NFSDNFSI",
-      "tipo": "ABIERTA"
-      
-      }
-    ]
+    "estado": "BORRADOR"
   }
 }

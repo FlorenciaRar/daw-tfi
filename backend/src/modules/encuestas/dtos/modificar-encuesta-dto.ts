@@ -6,13 +6,12 @@ import {
   IsArray,
   IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   ValidateNested,
 } from 'class-validator';
 import { ModificarPreguntaDTO } from './modificar-pregunta-dto';
+import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 
 export class ModificarEncuestaDTO {
   @ApiProperty()
@@ -20,6 +19,14 @@ export class ModificarEncuestaDTO {
   @IsOptional()
   @IsNotEmpty()
   nombre?: string;
+
+  @ApiProperty({ enum: TipoEstadoEnum })
+  @IsEnum(TipoEstadoEnum)
+  @IsOptional()
+  @IsNotEmpty()
+  estado?: TipoEstadoEnum;
+
+  //aca deberia meter lo del estado
 
   @ApiProperty({ type: [ModificarPreguntaDTO] })
   @IsArray()

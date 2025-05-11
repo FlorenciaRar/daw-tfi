@@ -7,12 +7,16 @@ import { CrearEncuestaDTO } from '../dtos/crear-encuesta-dto';
 import { v4 } from 'uuid';
 import { BuscarEncuestaDTO } from '../dtos/buscar-encuesta-dto';
 import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
+import { Pregunta } from '../entities/pregunta.entity';
+import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 
 @Injectable()
 export class EncuestasService {
   constructor(
     @InjectRepository(Encuesta)
     private encuestasRepository: Repository<Encuesta>,
+    @InjectRepository(Pregunta)
+    private preguntasRepository: Repository<Pregunta>,
   ) {}
 
   async buscarEncuesta(
@@ -73,13 +77,80 @@ export class EncuestasService {
     dtoBuscarEncuesta: BuscarEncuestaDTO,
     dtoModificarEncuesta: ModificarEncuestaDTO,
   ): Promise<{ id: number }> {
-    await this.buscarEncuesta(
+    const encuestaEncontrada = await this.buscarEncuesta(
       id,
       dtoBuscarEncuesta.codigo,
       dtoBuscarEncuesta.tipo,
     );
 
-    await this.encuestasRepository.update(id, dtoModificarEncuesta);
+    switch (encuestaEncontrada.estado) {
+      case TipoEstadoEnum.BORRADOR:
+        await this.encuestasRepository.update(id, {
+          nombre: dtoModificarEncuesta.nombre,
+          estado: dtoModificarEncuesta.estado,
+        });
+
+        if (dtoModificarEncuesta.estado !== TipoEstadoEnum.PUBLICADO) {
+          throw new BadRequestException(
+            'Solo podes publicar una encuesta en estado borrador',
+          );
+        }
+
+        if (
+          dtoModificarEncuesta.preguntas &&
+          dtoModificarEncuesta.preguntas?.length > 0
+        ) {
+          // Validar que cumpla con el dto crear pregunta FALTA
+          const nuevas = dtoModificarEncuesta.preguntas.filter((p) => !p.id);
+
+          // Validar que la pregunta exista en la encuesta FALTA
+          const existentes = dtoModificarEncuesta.preguntas.filter((p) => p.id);
+
+          if (nuevas.length > 0) {
+            await this.preguntasRepository.insert(
+              nuevas.map((p) => ({ ...p, encuesta: { id } })),
+            );
+          }
+
+          if (existentes.length > 0) {
+            await Promise.all(
+              existentes.map((p) =>
+                this.preguntasRepository.update(p.id, {
+                  ...p,
+                  encuesta: { id },
+                }),
+              ),
+            );
+          }
+        }
+        break;
+
+      case TipoEstadoEnum.PUBLICADO:
+        if (dtoModificarEncuesta.estado !== TipoEstadoEnum.CERRADO) {
+          throw new BadRequestException(
+            'Solo se puede modificar el estado a CERRADO en una encuesta publicada',
+          );
+        }
+
+        await this.encuestasRepository.update(id, {
+          estado: TipoEstadoEnum.CERRADO,
+        });
+
+        break;
+
+      case TipoEstadoEnum.CERRADO:
+        if (dtoModificarEncuesta.estado !== TipoEstadoEnum.PUBLICADO) {
+          throw new BadRequestException(
+            'Solo se puede modificar el estado a PUBLICADO en una encuesta cerrada',
+          );
+        }
+
+        await this.encuestasRepository.update(id, {
+          estado: TipoEstadoEnum.PUBLICADO,
+        });
+
+        break;
+    }
 
     return { id }; // Aca podria devolver el affected rows maybe?
   }

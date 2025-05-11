@@ -26,6 +26,10 @@ export class Opcion {
   @Exclude()
   pregunta: Pregunta;
 
-  @OneToMany(() => RespuestaOpcion, (respuestaOpcion) => respuestaOpcion.opcion, { cascade: ['insert'] })
-    respuestasOpciones: RespuestaOpcion[];
+  @OneToMany(
+    () => RespuestaOpcion,
+    (respuestaOpcion) => respuestaOpcion.opcion,
+    { cascade: ['insert'] },
+  )
+  respuestasOpciones: RespuestaOpcion[];
 }
