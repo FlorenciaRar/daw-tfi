@@ -1,7 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Respuesta } from 'src/modules/respuestas/entities/respuesta.entity';
 import { Repository } from 'typeorm';
+import { Respuesta } from 'src/modules/respuestas/entities/respuesta.entity';
+import { Encuesta } from '../encuestas/entities/encuesta.entity';
+import { TipoCodigoEnum } from '../encuestas/enums/tipo-codigo.enum';
 import { unparse } from 'papaparse';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -11,12 +18,37 @@ export class ReportesService {
   constructor(
     @InjectRepository(Respuesta)
     private readonly respuestaRepository: Repository<Respuesta>,
+    @InjectRepository(Encuesta)
+    private readonly encuestaRepository: Repository<Encuesta>,
   ) {}
 
-  async generarReporteCSV(idEncuesta: number): Promise<string> {
-    // Obtener respuestas de la encuesta por el id
+  async generarReporteCSV(
+    idEncuesta: number,
+    codigo: string,
+    tipo: TipoCodigoEnum,
+  ): Promise<string> {
+    if (tipo !== TipoCodigoEnum.RESULTADOS) {
+      throw new BadRequestException(
+        'Tipo de código inválido para acceder a los resultados',
+      );
+    }
+
+    const encuesta = await this.encuestaRepository.findOne({
+      where: { id: idEncuesta },
+    });
+
+    if (!encuesta) {
+      throw new NotFoundException('Encuesta no encontrada');
+    }
+
+    if (encuesta.codigoResultados !== codigo) {
+      throw new BadRequestException(
+        'Código de acceso inválido para esta encuesta',
+      );
+    }
+
     const respuestas = await this.respuestaRepository.find({
-      where: { encuesta: { id: idEncuesta } }, // Filtramos por ID de encuesta
+      where: { encuesta: { id: idEncuesta } },
       relations: [
         'encuesta',
         'respuestasAbiertas',
@@ -26,9 +58,13 @@ export class ReportesService {
         'respuestasOpciones.opcion.pregunta',
       ],
     });
-    console.log(respuestas);
 
-    // Mapear las respuestas a un formato adecuado para CSV
+    if (!respuestas || respuestas.length === 0) {
+      throw new BadRequestException(
+        'La encuesta no tiene respuestas registradas',
+      );
+    }
+
     const datos = respuestas.flatMap((respuesta) => {
       const nombreEncuesta = respuesta.encuesta?.nombre ?? 'Sin nombre';
 
@@ -51,19 +87,18 @@ export class ReportesService {
       return [...abiertas, ...opciones];
     });
 
-    console.log('Datos transformados:', datos);
+    if (datos.length === 0) {
+      throw new BadRequestException(
+        'No hay datos válidos para generar el reporte',
+      );
+    }
 
     try {
       const csv = unparse(datos, { header: true });
-      console.log('CSV generado:', csv);
-
-      if (!csv) {
-        throw new Error('No se generó un CSV válido');
-      }
 
       const directory = path.join(__dirname, '../../../reportes-csv');
       if (!fs.existsSync(directory)) {
-        fs.mkdirSync(directory, { recursive: true }); // Crea la carpeta si no existe
+        fs.mkdirSync(directory, { recursive: true });
       }
 
       const filePath = path.join(
@@ -75,7 +110,9 @@ export class ReportesService {
       return filePath;
     } catch (error) {
       console.error('Error al generar el CSV:', error);
-      throw error;
+      throw new InternalServerErrorException(
+        'Hubo un problema al generar el reporte',
+      );
     }
   }
 }
