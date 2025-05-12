@@ -27,7 +27,7 @@ export class RespuestasService {
 
     // Valida que solo haya una respuesta por cada pregunta (FALTA)
 
-    // Valida que las preguntas existan en la encuesta
+    // Valida que las preguntas abiertas existan en la encuesta
     const preguntasEnEncuesta = encuesta.preguntas.map((p) => p.id);
     const preguntasEnRespuesta = dtoRespuesta.respuestasAbiertas.map(
       (ra) => ra.idPregunta,
@@ -38,7 +38,7 @@ export class RespuestasService {
 
     if (idsInvalidos.length > 0) {
       throw new BadRequestException(
-        `Las preguntas [${idsInvalidos.join(', ')}] no pertenecen a la encuesta.`,
+        'Hay preguntas abiertas que no pertenecen a la encuesta',
       );
     }
 
@@ -48,12 +48,24 @@ export class RespuestasService {
       pregunta: { id: ra.idPregunta },
     }));
 
-    // OPCIONES
     const respuestasOpciones = dtoRespuesta.respuestasOpciones.map((ro) => ({
       opcion: { id: ro.idOpcion },
     }));
 
-    // meter las validaciones de las opciones
+    // valida qe las opciones existan en la encuesta que se esta respondiendo
+    const opcionesValidas = encuesta.preguntas.flatMap(
+      (p) => p.opciones?.map((o) => o.id) ?? [],
+    );
+
+    const opcionesInvalidas = respuestasOpciones.filter(
+      (ro) => !opcionesValidas.includes(ro.opcion.id),
+    );
+
+    if (opcionesInvalidas.length > 0) {
+      throw new BadRequestException(
+        'Hay opciones que no pertenecen a la encuesta',
+      );
+    }
 
     const respuesta: Respuesta = this.respuestasRepository.create({
       respuestasOpciones,

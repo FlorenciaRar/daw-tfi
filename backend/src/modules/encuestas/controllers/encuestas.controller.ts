@@ -13,6 +13,7 @@ import { BuscarEncuestaDTO } from '../dtos/buscar-encuesta-dto';
 import { CrearEncuestaDTO } from '../dtos/crear-encuesta-dto';
 import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
+import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
 
 @Controller('/encuestas')
 export class EncuestasController {
@@ -52,6 +53,19 @@ export class EncuestasController {
   // Ese enpoint recibe un array de ids de preguntas a eliminar, cosa de que en el front se pueda
   // borrar de a una o seleccionar y borrar por lotes
   // la eliminacion de las preguntas va a ser FISICA
+
+  @Patch(':id/eliminar-preguntas')
+  async eliminarPreguntas(
+    @Param('id') id: number,
+    @Query() dtoBuscarEncuesta: BuscarEncuestaDTO,
+    @Body() dtoPreguntas: EliminarPreguntaDTO,
+  ): Promise<any> {
+    return await this.encuestasService.eliminarPreguntas(
+      id,
+      dtoBuscarEncuesta,
+      dtoPreguntas,
+    );
+  }
 
   @Patch(':id/publicar')
   async publicarEncuesta(

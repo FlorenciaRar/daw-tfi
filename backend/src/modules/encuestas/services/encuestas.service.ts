@@ -9,6 +9,7 @@ import { BuscarEncuestaDTO } from '../dtos/buscar-encuesta-dto';
 import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
 import { Pregunta } from '../entities/pregunta.entity';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
+import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
 
 @Injectable()
 export class EncuestasService {
@@ -105,8 +106,20 @@ export class EncuestasService {
       // Validar que cumpla con el dto crear pregunta FALTA
       const nuevas = dtoModificarEncuesta.preguntas.filter((p) => !p.id);
 
-      // Validar que la pregunta exista en la encuesta FALTA
+      // Valida que la pregunta exista en la encuesta
       const existentes = dtoModificarEncuesta.preguntas.filter((p) => p.id);
+
+      const preguntasEnEncuesta = encuestaEncontrada.preguntas.map((p) => p.id);
+
+      const idsInvalidos = existentes
+        .map((p) => p.id)
+        .filter((id) => !preguntasEnEncuesta.includes(id));
+
+      if (idsInvalidos.length > 0) {
+        throw new BadRequestException(
+          'Se quieren modificar preguntas que no pertenecen a la encuesta',
+        );
+      }
 
       if (nuevas.length > 0) {
         await this.preguntasRepository.insert(
@@ -127,6 +140,32 @@ export class EncuestasService {
     }
 
     return { id }; // Aca podria devolver el affected rows maybe?
+  }
+
+  async eliminarPreguntas(
+    id: number,
+    dtoBuscarEncuesta: BuscarEncuestaDTO,
+    dtoPreguntas: EliminarPreguntaDTO,
+  ) {
+    if (dtoBuscarEncuesta.tipo !== TipoCodigoEnum.RESULTADOS) {
+      throw new BadRequestException('Datos de encuesta invalidos');
+    }
+
+    const encuestaEncontrada = await this.buscarEncuesta(
+      id,
+      dtoBuscarEncuesta.codigo,
+      dtoBuscarEncuesta.tipo,
+    );
+
+    const preguntasEnEncuesta = encuestaEncontrada.preguntas.map(
+      (pregunta) => pregunta.id,
+    );
+    console.log(preguntasEnEncuesta);
+
+    const preguntasInvalidas = preguntasEnEncuesta.filter(
+      (id) => !preguntasEnEncuesta.includes(id),
+    );
+    console.log(preguntasInvalidas);
   }
 
   async cambiarEstado(
