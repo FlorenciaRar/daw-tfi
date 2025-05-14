@@ -41,18 +41,13 @@ export class EncuestasController {
     @Param('id') id: number,
     @Query() dtoBuscarEncuesta: BuscarEncuestaDTO,
     @Body() dtoModificarEncuesta: ModificarEncuestaDTO,
-  ): Promise<{ id: number }> {
+  ): Promise<{ affected: number }> {
     return await this.encuestasService.modificarEncuesta(
       id,
       dtoBuscarEncuesta,
       dtoModificarEncuesta,
     );
   }
-
-  // Voy a hacer un endpoint aparte para eliminar las preguntas
-  // Ese enpoint recibe un array de ids de preguntas a eliminar, cosa de que en el front se pueda
-  // borrar de a una o seleccionar y borrar por lotes
-  // la eliminacion de las preguntas va a ser FISICA
 
   @Patch(':id/eliminar-preguntas')
   async eliminarPreguntas(

@@ -21,8 +21,7 @@ export class RespuestasService {
     dtoEncuesta: BuscarEncuestaDTO,
     dtoRespuesta: CrearRespuestaDTO,
   ): Promise<any> {
-
-    if(dtoEncuesta.tipo !==TipoCodigoEnum.RESPUESTA){
+    if (dtoEncuesta.tipo !== TipoCodigoEnum.RESPUESTA) {
       throw new BadRequestException('Datos de encuesta invalidos');
     }
     const encuesta = await this.encuestasService.buscarEncuesta(
@@ -31,8 +30,8 @@ export class RespuestasService {
       dtoEncuesta.tipo,
     );
 
-    if(encuesta.estado !== TipoEstadoEnum.PUBLICADO){
-      throw new BadRequestException('No se puede responder la encuesta')
+    if (encuesta.estado !== TipoEstadoEnum.PUBLICADO) {
+      throw new BadRequestException('No se puede responder la encuesta');
     }
 
     // Valida que solo haya una respuesta por cada pregunta (FALTA)

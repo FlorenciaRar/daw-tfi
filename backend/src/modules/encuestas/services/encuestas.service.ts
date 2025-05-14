@@ -80,7 +80,7 @@ export class EncuestasService {
     id: number,
     dtoBuscarEncuesta: BuscarEncuestaDTO,
     dtoModificarEncuesta: ModificarEncuestaDTO,
-  ): Promise<{ id: number }> {
+  ): Promise<{ affected: number }> {
     if (dtoBuscarEncuesta.tipo !== TipoCodigoEnum.RESULTADOS) {
       throw new BadRequestException('Datos de encuesta invalidos');
     }
@@ -90,57 +90,31 @@ export class EncuestasService {
       dtoBuscarEncuesta.codigo,
       dtoBuscarEncuesta.tipo,
     );
+
     if (encuestaEncontrada.estado !== TipoEstadoEnum.BORRADOR) {
       throw new BadRequestException(
         'Solo podes modificar una encuesta en estado BORRADOR',
       );
     }
-    await this.encuestasRepository.update(id, {
-      nombre: dtoModificarEncuesta.nombre,
-    });
 
     if (
       dtoModificarEncuesta.preguntas &&
-      dtoModificarEncuesta.preguntas?.length > 0
+      dtoModificarEncuesta.preguntas.length > 0
     ) {
-      // Validar que cumpla con el dto crear pregunta FALTA
-      const nuevas = dtoModificarEncuesta.preguntas.filter((p) => !p.id);
+      const nuevas = dtoModificarEncuesta.preguntas.map((p) => ({
+        ...p,
+        encuesta: { id },
+        opciones: p.opciones || [],
+      }));
 
-      // Valida que la pregunta exista en la encuesta
-      const existentes = dtoModificarEncuesta.preguntas.filter((p) => p.id);
-
-      const preguntasEnEncuesta = encuestaEncontrada.preguntas.map((p) => p.id);
-
-      const idsInvalidos = existentes
-        .map((p) => p.id)
-        .filter((id) => !preguntasEnEncuesta.includes(id));
-
-      if (idsInvalidos.length > 0) {
-        throw new BadRequestException(
-          'Se quieren modificar preguntas que no pertenecen a la encuesta',
-        );
-      }
-
-      if (nuevas.length > 0) {
-        await this.preguntasRepository.insert(
-          nuevas.map((p) => ({ ...p, encuesta: { id } })),
-          // Falta que contemple las opciones
-        );
-      }
-
-      if (existentes.length > 0) {
-        await Promise.all(
-          existentes.map((p) =>
-            this.preguntasRepository.update(p.id, {
-              ...p,
-              encuesta: { id },
-            }),
-          ),
-        );
-      }
+      await this.preguntasRepository.save(nuevas);
     }
 
-    return { id }; // Aca podria devolver el affected rows maybe?
+    const resultado: UpdateResult = await this.encuestasRepository.update(id, {
+      nombre: dtoModificarEncuesta.nombre,
+    });
+
+    return { affected: resultado.affected ?? 0 };
   }
 
   async eliminarPreguntas(

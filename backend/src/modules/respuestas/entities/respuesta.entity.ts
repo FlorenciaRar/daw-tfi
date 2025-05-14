@@ -1,6 +1,5 @@
 import { Encuesta } from 'src/modules/encuestas/entities/encuesta.entity';
 import {
-  Column,
   Entity,
   JoinColumn,
   ManyToOne,
