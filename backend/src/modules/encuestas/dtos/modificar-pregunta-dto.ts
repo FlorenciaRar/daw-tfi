@@ -10,6 +10,7 @@ import {
 import { TiposRespuestaEnum } from '../enums/tipo-respuesta.enum';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { CrearOpcionDTO } from './crear-opcion-dto';
 
 export class ModificarPreguntaDTO {
   @ApiProperty()
@@ -36,10 +37,10 @@ export class ModificarPreguntaDTO {
   @IsNotEmpty()
   tipo: TiposRespuestaEnum;
 
-  // @ApiProperty({ type: [CrearOpcionDTO], required: false })
-  // @IsArray()
-  // @IsOptional()
-  // @ValidateNested({ each: true })
-  // @Type(() => CrearOpcionDTO)
-  // opciones?: CrearOpcionDTO[];
+  @ApiProperty({ type: [CrearOpcionDTO], required: false })
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CrearOpcionDTO)
+  opciones?: CrearOpcionDTO[];
 }

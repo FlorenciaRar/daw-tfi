@@ -5,14 +5,14 @@ meta {
 }
 
 patch {
-  url: http://localhost:3000/api/v1/encuestas/13/?codigo=22835dfb-df94-4961-a6f0-ccc31d7bce2c&tipo=RESPUESTA
+  url: http://localhost:3000/api/v1/encuestas/13/?codigo=cb4cda15-a40c-45ac-be00-12fa90e43501&tipo=RESULTADOS
   body: json
   auth: inherit
 }
 
 params:query {
-  codigo: 22835dfb-df94-4961-a6f0-ccc31d7bce2c
-  tipo: RESPUESTA
+  codigo: cb4cda15-a40c-45ac-be00-12fa90e43501
+  tipo: RESULTADOS
 }
 
 body:json {
@@ -20,14 +20,14 @@ body:json {
     "nombre": "La encuesta de Pepe",
     "preguntas": [
       {
-        "id":6,
-        "texto": "¿Cuál es tu color favorito ahora?"
-      },
-      {
-      "numero":1,
-      "texto":"NFSDNFSI",
-      "tipo": "ABIERTA"
-      
+        "id":42,
+        "numero":16,
+        "texto": "¿Cuál es tu color favorito ahora?",
+        "tipo":"OPCION_MULTIPLE_SELECCION_MULTIPLE",
+        "opciones":[
+          {"numero":2
+          }
+        ]
       }
     ]
   }

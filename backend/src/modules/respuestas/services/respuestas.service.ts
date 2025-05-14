@@ -5,6 +5,8 @@ import { BuscarEncuestaDTO } from 'src/modules/encuestas/dtos/buscar-encuesta-dt
 import { Respuesta } from '../entities/respuesta.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { TipoEstadoEnum } from 'src/modules/encuestas/enums/tipo-estado.enum';
+import { TipoCodigoEnum } from 'src/modules/encuestas/enums/tipo-codigo.enum';
 
 @Injectable()
 export class RespuestasService {
@@ -19,11 +21,19 @@ export class RespuestasService {
     dtoEncuesta: BuscarEncuestaDTO,
     dtoRespuesta: CrearRespuestaDTO,
   ): Promise<any> {
+
+    if(dtoEncuesta.tipo !==TipoCodigoEnum.RESPUESTA){
+      throw new BadRequestException('Datos de encuesta invalidos');
+    }
     const encuesta = await this.encuestasService.buscarEncuesta(
       id,
       dtoEncuesta.codigo,
       dtoEncuesta.tipo,
     );
+
+    if(encuesta.estado !== TipoEstadoEnum.PUBLICADO){
+      throw new BadRequestException('No se puede responder la encuesta')
+    }
 
     // Valida que solo haya una respuesta por cada pregunta (FALTA)
 

@@ -5,18 +5,18 @@ meta {
 }
 
 patch {
-  url: http://localhost:3000/api/v1/encuestas/13/?codigo=22835dfb-df94-4961-a6f0-ccc31d7bce2c&tipo=RESPUESTA
+  url: http://localhost:3000/api/v1/encuestas/13/cerrar?codigo=cb4cda15-a40c-45ac-be00-12fa90e43501&tipo=RESULTADOS
   body: json
   auth: inherit
 }
 
 params:query {
-  codigo: 22835dfb-df94-4961-a6f0-ccc31d7bce2c
-  tipo: RESPUESTA
+  codigo: cb4cda15-a40c-45ac-be00-12fa90e43501
+  tipo: RESULTADOS
 }
 
 body:json {
   {
-    "estado": "BORRADOR"
+    "estado": "CERRADO"
   }
 }

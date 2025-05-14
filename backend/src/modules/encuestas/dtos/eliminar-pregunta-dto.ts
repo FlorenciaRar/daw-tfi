@@ -1,10 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  ArrayMinSize,
-  ArrayNotEmpty,
-  IsArray,
-  ValidateNested,
-} from 'class-validator';
+import { ArrayMinSize, ArrayNotEmpty, IsArray } from 'class-validator';
 
 export class EliminarPreguntaDTO {
   @ApiProperty()

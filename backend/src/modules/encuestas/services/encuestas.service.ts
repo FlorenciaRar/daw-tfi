@@ -124,6 +124,7 @@ export class EncuestasService {
       if (nuevas.length > 0) {
         await this.preguntasRepository.insert(
           nuevas.map((p) => ({ ...p, encuesta: { id } })),
+          // Falta que contemple las opciones
         );
       }
 
@@ -157,15 +158,31 @@ export class EncuestasService {
       dtoBuscarEncuesta.tipo,
     );
 
+    if (encuestaEncontrada.estado !== TipoEstadoEnum.BORRADOR) {
+      throw new BadRequestException(
+        'No se pueden eliminar las preguntas de una encuesta que no este en borrador',
+      );
+    }
+
     const preguntasEnEncuesta = encuestaEncontrada.preguntas.map(
       (pregunta) => pregunta.id,
     );
-    console.log(preguntasEnEncuesta);
 
-    const preguntasInvalidas = preguntasEnEncuesta.filter(
+    const preguntasInvalidas = dtoPreguntas.preguntas.filter(
       (id) => !preguntasEnEncuesta.includes(id),
     );
-    console.log(preguntasInvalidas);
+
+    if (preguntasInvalidas.length > 0) {
+      throw new BadRequestException(
+        'Hay preguntas que no coinciden con las preguntas de la encuesta',
+      );
+    }
+
+    await this.preguntasRepository.delete(dtoPreguntas.preguntas);
+
+    return {
+      eliminadas: dtoPreguntas.preguntas,
+    };
   }
 
   async cambiarEstado(
