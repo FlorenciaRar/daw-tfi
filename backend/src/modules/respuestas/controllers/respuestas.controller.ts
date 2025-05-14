@@ -7,9 +7,15 @@ import { BuscarEncuestaDTO } from 'src/modules/encuestas/dtos/buscar-encuesta-dt
 export class RespuestasController {
   constructor(private respuestasService: RespuestasService) {}
 
-  @Get()
-  mostrarHola(): string {
-    return 'hola';
+  @Get(':id')
+  async obtenerResultadosEncuesta(
+    @Param('id') idEncuesta: number,
+    @Query() query: BuscarEncuestaDTO,
+  ): Promise<any[]> {
+    return await this.respuestasService.obtenerRespuestasPorEncuesta(
+      idEncuesta,
+      query,
+    );
   }
 
   @Post(':id')
@@ -18,6 +24,10 @@ export class RespuestasController {
     @Query() dtoEncuesta: BuscarEncuestaDTO,
     @Body() dtoRespuesta: CrearRespuestaDTO,
   ): Promise<any> {
-    return await this.respuestasService.crearRespuesta(id,dtoEncuesta, dtoRespuesta);
+    return await this.respuestasService.crearRespuesta(
+      id,
+      dtoEncuesta,
+      dtoRespuesta,
+    );
   }
 }
