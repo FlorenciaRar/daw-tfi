@@ -16,14 +16,85 @@ export class RespuestasService {
     private respuestasRepository: Repository<Respuesta>,
   ) {}
 
+  async obtenerRespuestasPorEncuesta(
+    idEncuesta: number,
+    dtoEncuesta: BuscarEncuestaDTO,
+  ): Promise<any> {
+    const encuesta = await this.encuestasService.buscarEncuesta(
+      idEncuesta,
+      dtoEncuesta.codigo,
+      dtoEncuesta.tipo,
+    );
+
+    if (!encuesta) {
+      throw new BadRequestException(
+        'La encuesta no existe o los parámetros son incorrectos.',
+      );
+    }
+
+    const respuestas = await this.respuestasRepository.find({
+      where: { encuesta: { id: idEncuesta } },
+      relations: [
+        'respuestasAbiertas',
+        'respuestasAbiertas.pregunta',
+        'respuestasOpciones',
+        'respuestasOpciones.opcion',
+        'respuestasOpciones.opcion.pregunta',
+      ],
+    });
+
+    const preguntasConResultados = encuesta.preguntas.map((pregunta) => {
+      const respuestasAbiertas = respuestas
+        .flatMap((respuesta) => respuesta.respuestasAbiertas)
+        .filter((ra) => ra.pregunta.id === pregunta.id)
+        .map((ra) => ({
+          id: ra.id,
+          texto: ra.texto,
+        }));
+
+      const respuestasOpciones = respuestas
+        .flatMap((respuesta) => respuesta.respuestasOpciones)
+        .filter((ro) => ro.opcion && ro.opcion.pregunta.id === pregunta.id)
+        .map((ro) => ({
+          id: ro.id,
+          idOpcion: ro.opcion.id,
+          textoOpcion: ro.opcion.texto,
+        }));
+
+      const totalRespuestas =
+        respuestasAbiertas.length + respuestasOpciones.length;
+
+      return {
+        id: pregunta.id,
+        texto: pregunta.texto,
+        tipo: pregunta.tipo,
+        respuestasAbiertas,
+        respuestasOpciones,
+        totalRespuestas,
+      };
+    });
+
+    return {
+      id: encuesta.id,
+      nombre: encuesta.nombre,
+      preguntas: preguntasConResultados,
+    };
+  }
+
   async crearRespuesta(
     id: number,
     dtoEncuesta: BuscarEncuestaDTO,
     dtoRespuesta: CrearRespuestaDTO,
-  ): Promise<any> {
+  ): Promise<{
+    id: number;
+    encuesta: { id: number; titulo: string };
+    respuestasAbiertas: { id: number; texto: string; idPregunta: number }[];
+    respuestasOpciones: { id: number; idOpcion: number }[];
+  }> {
     if (dtoEncuesta.tipo !== TipoCodigoEnum.RESPUESTA) {
-      throw new BadRequestException('Datos de encuesta invalidos');
+      throw new BadRequestException('Datos de encuesta inválidos');
     }
+
     const encuesta = await this.encuestasService.buscarEncuesta(
       id,
       dtoEncuesta.codigo,
@@ -34,56 +105,66 @@ export class RespuestasService {
       throw new BadRequestException('No se puede responder la encuesta');
     }
 
-    // Valida que solo haya una respuesta por cada pregunta (FALTA)
-
-    // Valida que las preguntas abiertas existan en la encuesta
-    const preguntasEnEncuesta = encuesta.preguntas.map((p) => p.id);
-    const preguntasEnRespuesta = dtoRespuesta.respuestasAbiertas.map(
-      (ra) => ra.idPregunta,
+    const preguntasEncuesta = encuesta.preguntas.map((p) => p.id);
+    const preguntasEnRespuestaAbierta =
+      dtoRespuesta.respuestasAbiertas?.map((r) => r.idPregunta) || [];
+    const preguntasInvalidasAbiertas = preguntasEnRespuestaAbierta.filter(
+      (p) => !preguntasEncuesta.includes(p),
     );
-    const idsInvalidos = preguntasEnRespuesta.filter(
-      (id) => !preguntasEnEncuesta.includes(id),
-    );
-
-    if (idsInvalidos.length > 0) {
+    if (preguntasInvalidasAbiertas.length > 0) {
       throw new BadRequestException(
-        'Hay preguntas abiertas que no pertenecen a la encuesta',
+        `Las preguntas [${preguntasInvalidasAbiertas.join(', ')}] no pertenecen a la encuesta.`,
       );
     }
 
-    // Array de respuestas abiertas con el id de la pregunta a la que esta asociada la rta
-    const respuestasAbiertas = dtoRespuesta.respuestasAbiertas.map((ra) => ({
-      texto: ra.texto,
-      pregunta: { id: ra.idPregunta },
-    }));
-
-    const respuestasOpciones = dtoRespuesta.respuestasOpciones.map((ro) => ({
-      opcion: { id: ro.idOpcion },
-    }));
-
-    // valida qe las opciones existan en la encuesta que se esta respondiendo
-    const opcionesValidas = encuesta.preguntas.flatMap(
-      (p) => p.opciones?.map((o) => o.id) ?? [],
+    const opcionesEncuesta = encuesta.preguntas.flatMap((p) =>
+      p.opciones.map((o) => o.id),
     );
-
-    const opcionesInvalidas = respuestasOpciones.filter(
-      (ro) => !opcionesValidas.includes(ro.opcion.id),
+    const opcionesEnRespuesta =
+      dtoRespuesta.respuestasOpciones?.map((ro) => ro.idOpcion) || [];
+    const opcionesInvalidas = opcionesEnRespuesta.filter(
+      (id) => !opcionesEncuesta.includes(id),
     );
-
     if (opcionesInvalidas.length > 0) {
       throw new BadRequestException(
-        'Hay opciones que no pertenecen a la encuesta',
+        `Las opciones [${opcionesInvalidas.join(', ')}] no pertenecen a la encuesta.`,
       );
     }
 
-    const respuesta: Respuesta = this.respuestasRepository.create({
-      respuestasOpciones,
+    const respuestasAbiertas =
+      dtoRespuesta.respuestasAbiertas?.map((ra) => ({
+        texto: ra.texto,
+        pregunta: { id: ra.idPregunta },
+      })) || [];
+
+    const respuestasOpciones =
+      dtoRespuesta.respuestasOpciones?.map((ro) => ({
+        opcion: { id: ro.idOpcion },
+      })) || [];
+
+    const nuevaRespuesta = this.respuestasRepository.create({
+      encuesta,
       respuestasAbiertas,
-      encuesta: encuesta,
+      respuestasOpciones,
     });
 
-    const respuestaGuardada = await this.respuestasRepository.save(respuesta);
+    const guardada = await this.respuestasRepository.save(nuevaRespuesta);
 
-    return { id: respuestaGuardada.id };
+    return {
+      id: guardada.id,
+      encuesta: {
+        id: encuesta.id,
+        titulo: encuesta.nombre,
+      },
+      respuestasAbiertas: guardada.respuestasAbiertas.map((ra) => ({
+        id: ra.id,
+        texto: ra.texto,
+        idPregunta: ra.pregunta.id,
+      })),
+      respuestasOpciones: guardada.respuestasOpciones.map((ro) => ({
+        id: ro.id,
+        idOpcion: ro.opcion.id,
+      })),
+    };
   }
 }
