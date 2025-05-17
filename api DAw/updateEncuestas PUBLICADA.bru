@@ -1,0 +1,22 @@
+meta {
+  name: updateEncuestas PUBLICADA
+  type: http
+  seq: 6
+}
+
+patch {
+  url: http://localhost:3000/api/v1/encuestas/13/cerrar?codigo=cb4cda15-a40c-45ac-be00-12fa90e43501&tipo=RESULTADOS
+  body: json
+  auth: inherit
+}
+
+params:query {
+  codigo: cb4cda15-a40c-45ac-be00-12fa90e43501
+  tipo: RESULTADOS
+}
+
+body:json {
+  {
+    "estado": "CERRADO"
+  }
+}

@@ -8,7 +8,10 @@ import { RespuestaAbierta } from './entities/respuesta-abierta.entity';
 import { RespuestaOpcion } from './entities/respuesta-opcion.entity';
 
 @Module({
-  imports: [EncuestasModule, TypeOrmModule.forFeature([Respuesta, RespuestaAbierta, RespuestaOpcion])],
+  imports: [
+    EncuestasModule,
+    TypeOrmModule.forFeature([Respuesta, RespuestaAbierta, RespuestaOpcion]),
+  ],
   controllers: [RespuestasController],
   providers: [RespuestasService],
 })

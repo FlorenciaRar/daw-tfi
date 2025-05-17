@@ -12,6 +12,8 @@ import { Encuesta } from '../entities/encuesta.entity';
 import { BuscarEncuestaDTO } from '../dtos/buscar-encuesta-dto';
 import { CrearEncuestaDTO } from '../dtos/crear-encuesta-dto';
 import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
+import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
+import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
 
 @Controller('/encuestas')
 export class EncuestasController {
@@ -39,11 +41,60 @@ export class EncuestasController {
     @Param('id') id: number,
     @Query() dtoBuscarEncuesta: BuscarEncuestaDTO,
     @Body() dtoModificarEncuesta: ModificarEncuestaDTO,
-  ): Promise<{ id: number }> {
+  ): Promise<{ affected: number }> {
     return await this.encuestasService.modificarEncuesta(
       id,
       dtoBuscarEncuesta,
       dtoModificarEncuesta,
+    );
+  }
+
+  @Patch(':id/eliminar-preguntas')
+  async eliminarPreguntas(
+    @Param('id') id: number,
+    @Query() dtoBuscarEncuesta: BuscarEncuestaDTO,
+    @Body() dtoPreguntas: EliminarPreguntaDTO,
+  ): Promise<any> {
+    return await this.encuestasService.eliminarPreguntas(
+      id,
+      dtoBuscarEncuesta,
+      dtoPreguntas,
+    );
+  }
+
+  @Patch(':id/publicar')
+  async publicarEncuesta(
+    @Param('id') id: number,
+    @Query() dto: BuscarEncuestaDTO,
+  ): Promise<{ affected: number }> {
+    return await this.encuestasService.cambiarEstado(
+      id,
+      dto,
+      TipoEstadoEnum.PUBLICADO,
+    );
+  }
+
+  @Patch(':id/cerrar')
+  async cerrarEncuesta(
+    @Param('id') id: number,
+    @Query() dto: BuscarEncuestaDTO,
+  ): Promise<{ affected: number }> {
+    return await this.encuestasService.cambiarEstado(
+      id,
+      dto,
+      TipoEstadoEnum.CERRADO,
+    );
+  }
+
+  @Patch(':id/eliminar')
+  async eliminarEncuesta(
+    @Param('id') id: number,
+    @Query() dto: BuscarEncuestaDTO,
+  ): Promise<{ affected: number }> {
+    return await this.encuestasService.cambiarEstado(
+      id,
+      dto,
+      TipoEstadoEnum.ELIMINADO,
     );
   }
 }

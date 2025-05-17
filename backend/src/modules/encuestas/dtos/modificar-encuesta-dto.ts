@@ -4,15 +4,12 @@ import {
   ArrayMinSize,
   ArrayNotEmpty,
   IsArray,
-  IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { ModificarPreguntaDTO } from './modificar-pregunta-dto';
+import { CrearPreguntaDTO } from './crear-pregunta-dto';
 
 export class ModificarEncuestaDTO {
   @ApiProperty()
@@ -21,12 +18,12 @@ export class ModificarEncuestaDTO {
   @IsNotEmpty()
   nombre?: string;
 
-  @ApiProperty({ type: [ModificarPreguntaDTO] })
+  @ApiProperty({ type: [CrearPreguntaDTO] })
   @IsArray()
   @IsOptional()
   @ArrayNotEmpty()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => ModificarPreguntaDTO)
-  preguntas?: ModificarPreguntaDTO[];
+  @Type(() => CrearPreguntaDTO)
+  preguntas?: CrearPreguntaDTO[];
 }

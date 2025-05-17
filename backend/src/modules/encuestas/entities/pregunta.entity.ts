@@ -34,6 +34,10 @@ export class Pregunta {
   @OneToMany(() => Opcion, (opcion) => opcion.pregunta, { cascade: ['insert'] })
   opciones: Opcion[];
 
-  @OneToMany(() => RespuestaAbierta, (respuestaAbierta) => respuestaAbierta.pregunta, { cascade: ['insert'] })
+  @OneToMany(
+    () => RespuestaAbierta,
+    (respuestaAbierta) => respuestaAbierta.pregunta,
+    { cascade: ['insert', 'remove'], onDelete: 'CASCADE' },
+  )
   respuestasAbiertas: RespuestaAbierta[];
 }

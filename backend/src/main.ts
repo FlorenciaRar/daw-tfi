@@ -47,6 +47,9 @@ async function bootstrap() {
 
   const port: number = configService.get<number>('port') as number;
   await app.listen(port);
+  console.log(
+    `🚀 Servidor corriendo en http://localhost:${port}/${globalPrefix}`,
+  );
 }
 
 bootstrap();

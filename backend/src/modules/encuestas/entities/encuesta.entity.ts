@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Pregunta } from './pregunta.entity';
 import { Exclude } from 'class-transformer';
 import { Respuesta } from 'src/modules/respuestas/entities/respuesta.entity';
+import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 
 @Entity({ name: 'encuestas' })
 export class Encuesta {
@@ -10,6 +11,9 @@ export class Encuesta {
 
   @Column()
   nombre: string;
+
+  @Column({ type: 'enum', enum: TipoEstadoEnum })
+  estado: TipoEstadoEnum;
 
   @OneToMany(() => Pregunta, (pregunta: Pregunta) => pregunta.encuesta, {
     cascade: ['insert'],
@@ -25,5 +29,4 @@ export class Encuesta {
 
   @OneToMany(() => Respuesta, (respuesta) => respuesta.encuesta)
   respuestas: Respuesta[];
-  
 }

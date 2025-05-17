@@ -4,11 +4,13 @@ import configuration from './config/configuration';
 import { EncuestasModule } from './modules/encuestas/encuestas.module';
 import { RespuestasModule } from './modules/respuestas/respuestas.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ReportesModule } from './modules/reportes/reportes.module';
 
 @Module({
   imports: [
     EncuestasModule,
     RespuestasModule,
+    ReportesModule,
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true,
