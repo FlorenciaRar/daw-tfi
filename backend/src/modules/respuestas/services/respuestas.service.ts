@@ -18,7 +18,6 @@ export class RespuestasService {
     idEncuesta: number,
     dtoEncuesta: BuscarEncuestaDTO,
   ): Promise<any> {
-    // Validar que la encuesta exista y coincida con el código y tipo
     const encuesta = await this.encuestasService.buscarEncuesta(
       idEncuesta,
       dtoEncuesta.codigo,
@@ -31,7 +30,6 @@ export class RespuestasService {
       );
     }
 
-    // Obtener las respuestas relacionadas con la encuesta
     const respuestas = await this.respuestasRepository.find({
       where: { encuesta: { id: idEncuesta } },
       relations: [
@@ -43,9 +41,7 @@ export class RespuestasService {
       ],
     });
 
-    // Mapear las preguntas con sus respuestas y contadores
     const preguntasConResultados = encuesta.preguntas.map((pregunta) => {
-      // Respuestas abiertas asociadas a esta pregunta
       const respuestasAbiertas = respuestas
         .flatMap((respuesta) => respuesta.respuestasAbiertas)
         .filter((ra) => ra.pregunta.id === pregunta.id)
@@ -54,7 +50,6 @@ export class RespuestasService {
           texto: ra.texto,
         }));
 
-      // Respuestas de opciones asociadas a esta pregunta
       const respuestasOpciones = respuestas
         .flatMap((respuesta) => respuesta.respuestasOpciones)
         .filter((ro) => ro.opcion && ro.opcion.pregunta.id === pregunta.id)
@@ -64,7 +59,6 @@ export class RespuestasService {
           textoOpcion: ro.opcion.texto,
         }));
 
-      // Contador de respuestas
       const totalRespuestas =
         respuestasAbiertas.length + respuestasOpciones.length;
 
@@ -78,11 +72,9 @@ export class RespuestasService {
       };
     });
 
-    // Retornar la encuesta con las preguntas y sus resultados
     return {
       id: encuesta.id,
       nombre: encuesta.nombre,
-      // fechaCreacion: encuesta.fechaCreacion, // Asegúrate de que `fechaCreacion` exista en la entidad
       preguntas: preguntasConResultados,
     };
   }
@@ -103,7 +95,6 @@ export class RespuestasService {
       dtoEncuesta.tipo,
     );
 
-    // Validar preguntas abiertas
     const preguntasEncuesta = encuesta.preguntas.map((p) => p.id);
     const preguntasEnRespuestaAbierta =
       dtoRespuesta.respuestasAbiertas?.map((r) => r.idPregunta) || [];
@@ -116,7 +107,6 @@ export class RespuestasService {
       );
     }
 
-    // Validar opciones (que estén en preguntas de esta encuesta)
     const opcionesEncuesta = encuesta.preguntas.flatMap((p) =>
       p.opciones.map((o) => o.id),
     );
@@ -131,7 +121,6 @@ export class RespuestasService {
       );
     }
 
-    // Crear objetos de relaciones
     const respuestasAbiertas =
       dtoRespuesta.respuestasAbiertas?.map((ra) => ({
         texto: ra.texto,
@@ -143,7 +132,6 @@ export class RespuestasService {
         opcion: { id: ro.idOpcion },
       })) || [];
 
-    // Crear respuesta principal
     const nuevaRespuesta = this.respuestasRepository.create({
       encuesta,
       respuestasAbiertas,
@@ -152,12 +140,11 @@ export class RespuestasService {
 
     const guardada = await this.respuestasRepository.save(nuevaRespuesta);
 
-    // Retornar más datos
     return {
       id: guardada.id,
       encuesta: {
         id: encuesta.id,
-        titulo: encuesta.nombre, // Asegúrate de que `titulo` exista en el objeto `encuesta`
+        titulo: encuesta.nombre,
       },
       respuestasAbiertas: guardada.respuestasAbiertas.map((ra) => ({
         id: ra.id,
