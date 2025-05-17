@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Encuesta } from '../entities/encuesta.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Not, Repository, UpdateResult } from 'typeorm';
 import { TipoCodigoEnum } from '../enums/tipo-codigo.enum';
 import { CrearEncuestaDTO } from '../dtos/crear-encuesta-dto';
 import { v4 } from 'uuid';
@@ -10,6 +10,7 @@ import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
 import { Pregunta } from '../entities/pregunta.entity';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
+import { PaginarEncuestasDTO } from '../dtos/paginar-encuestas.dto';
 
 @Injectable()
 export class EncuestasService {
@@ -73,6 +74,31 @@ export class EncuestasService {
       id: encuestaGuardada.id,
       codigoRespuesta: encuestaGuardada.codigoRespuesta,
       codigoResultados: encuestaGuardada.codigoResultados,
+    };
+  }
+
+  async obtenerEncuestasPaginadas(dto: PaginarEncuestasDTO): Promise<any> {
+    const { page = 1, limit = 10 } = dto;
+
+    const [data, total] = await this.encuestasRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { id: 'ASC' },
+      where: {
+        estado: Not(TipoEstadoEnum.ELIMINADO),
+      },
+      relations: ['preguntas', 'preguntas.opciones'],
+    });
+
+    return {
+      total,
+      page,
+      limit,
+      data,
+      message:
+        data.length > 0
+          ? 'Encuestas encontradas'
+          : 'No hay más encuestas para mostrar',
     };
   }
 

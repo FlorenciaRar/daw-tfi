@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TipoEstadoEnum } from 'src/modules/encuestas/enums/tipo-estado.enum';
 import { TipoCodigoEnum } from 'src/modules/encuestas/enums/tipo-codigo.enum';
+import { PaginarRespuestasDTO } from '../dtos/pagina-respuestas.dto';
 
 @Injectable()
 export class RespuestasService {
@@ -15,6 +16,30 @@ export class RespuestasService {
     @InjectRepository(Respuesta)
     private respuestasRepository: Repository<Respuesta>,
   ) {}
+
+  async obtenerRespuestasPaginadas(dto: PaginarRespuestasDTO) {
+    const { page = 1, limit = 10 } = dto;
+
+    const [respuestas, total] = await this.respuestasRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: ['encuesta'], // si querés mostrar datos de la encuesta también
+      order: {
+        id: 'ASC',
+      },
+    });
+
+    return {
+      total,
+      page,
+      limit,
+      data: respuestas,
+      message:
+        respuestas.length > 0
+          ? 'Respuestas encontradas'
+          : 'No hay más respuestas para mostrar',
+    };
+  }
 
   async obtenerRespuestasPorEncuesta(
     idEncuesta: number,

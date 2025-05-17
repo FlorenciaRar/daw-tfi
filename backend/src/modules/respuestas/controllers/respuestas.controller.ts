@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { RespuestasService } from '../services/respuestas.service';
 import { CrearRespuestaDTO } from '../dtos/crear-respuesta-dto';
 import { BuscarEncuestaDTO } from 'src/modules/encuestas/dtos/buscar-encuesta-dto';
+import { PaginarRespuestasDTO } from '../dtos/pagina-respuestas.dto';
 
 @Controller('/respuestas')
 export class RespuestasController {
@@ -16,6 +17,11 @@ export class RespuestasController {
       idEncuesta,
       query,
     );
+  }
+
+  @Get()
+  async listarRespuestas(@Query() dto: PaginarRespuestasDTO) {
+    return await this.respuestasService.obtenerRespuestasPaginadas(dto);
   }
 
   @Post(':id')
