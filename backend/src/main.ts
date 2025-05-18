@@ -31,6 +31,12 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
+  // Habilitar CORS para el frontend
+  app.enableCors({
+    origin: 'http://localhost:4200',
+    methods: 'GET,POST,PATCH,DELETE',
+  });
+
   const swaggerHabilitado: boolean = configService.get(
     'swaggerHabilitado',
   ) as boolean;

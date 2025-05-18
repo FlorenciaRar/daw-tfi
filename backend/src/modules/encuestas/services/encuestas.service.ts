@@ -80,6 +80,8 @@ export class EncuestasService {
   async obtenerEncuestasPaginadas(dto: PaginarEncuestasDTO): Promise<any> {
     const { page = 1, limit = 10 } = dto;
 
+    console.log('Parámetros recibidos:', { page, limit });
+
     const [data, total] = await this.encuestasRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
