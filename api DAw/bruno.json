@@ -1,9 +1,0 @@
-{
-  "version": "1",
-  "name": "api DAw",
-  "type": "collection",
-  "ignore": [
-    "node_modules",
-    ".git"
-  ]
-}

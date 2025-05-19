@@ -14,6 +14,7 @@ import { CrearEncuestaDTO } from '../dtos/crear-encuesta-dto';
 import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
+import { EncuestaDetalleDTO } from '../dtos/encuesta-detalle.dto';
 
 @Controller('/encuestas')
 export class EncuestasController {
@@ -23,7 +24,7 @@ export class EncuestasController {
   async buscarEncuesta(
     @Param('id') id: number,
     @Query() dto: BuscarEncuestaDTO,
-  ): Promise<Encuesta> {
+  ): Promise<EncuestaDetalleDTO> {
     return await this.encuestasService.buscarEncuesta(id, dto.codigo, dto.tipo);
   }
 
