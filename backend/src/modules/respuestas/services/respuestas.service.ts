@@ -41,6 +41,77 @@ export class RespuestasService {
     };
   }
 
+  async obtenerRespuestasPaginadasPorEncuesta(
+    //se agrega metodo para paginar respuestas por encuesta)
+    idEncuesta: number,
+    codigo: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<any> {
+    // Verificar que el código sea válido
+    const encuesta = await this.encuestasService.buscarEncuesta(
+      idEncuesta,
+      codigo,
+      TipoCodigoEnum.RESULTADOS,
+    );
+
+    if (!encuesta) {
+      return {
+        total: 0,
+        page,
+        limit,
+        data: [],
+        message: 'Código inválido o encuesta no encontrada',
+      };
+    }
+
+    // Obtener las respuestas paginadas
+    const [respuestas, total] = await this.respuestasRepository.findAndCount({
+      where: { encuesta: { id: idEncuesta } },
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: [
+        'respuestasAbiertas',
+        'respuestasAbiertas.pregunta',
+        'respuestasOpciones',
+        'respuestasOpciones.opcion',
+        'respuestasOpciones.opcion.pregunta',
+      ],
+      order: { id: 'ASC' },
+    });
+
+    const data = respuestas.flatMap((respuesta) => {
+      const respuestasAbiertas = respuesta.respuestasAbiertas.map((ra) => ({
+        pregunta: {
+          id: ra.pregunta.id,
+          texto: ra.pregunta.texto,
+        },
+        respuesta: ra.texto,
+      }));
+
+      const respuestasOpciones = respuesta.respuestasOpciones.map((ro) => ({
+        pregunta: {
+          id: ro.opcion.pregunta.id,
+          texto: ro.opcion.pregunta.texto,
+        },
+        respuesta: ro.opcion.texto,
+      }));
+
+      return [...respuestasAbiertas, ...respuestasOpciones];
+    });
+
+    return {
+      total,
+      page,
+      limit,
+      data,
+      message:
+        data.length > 0
+          ? 'Respuestas encontradas'
+          : 'No hay más respuestas para mostrar',
+    };
+  }
+
   async obtenerRespuestasPorEncuesta(
     idEncuesta: number,
     dtoEncuesta: BuscarEncuestaDTO,

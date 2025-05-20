@@ -24,6 +24,21 @@ export class RespuestasController {
     return await this.respuestasService.obtenerRespuestasPaginadas(dto);
   }
 
+  @Get(':id/paginadas') //se agrega metodo para paginar respuestas por encuesta
+  async obtenerRespuestasPaginadasPorEncuesta(
+    @Param('id') idEncuesta: number,
+    @Query('codigo') codigo: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<any> {
+    return await this.respuestasService.obtenerRespuestasPaginadasPorEncuesta(
+      idEncuesta,
+      codigo,
+      page,
+      limit,
+    );
+  }
+
   @Post(':id')
   async crearRespuesta(
     @Param('id') id: number,
