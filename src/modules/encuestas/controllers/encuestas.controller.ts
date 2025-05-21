@@ -14,7 +14,11 @@ import { CrearEncuestaDTO } from '../dtos/crear-encuesta-dto';
 import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
+<<<<<<< HEAD:backend/src/modules/encuestas/controllers/encuestas.controller.ts
+import { PaginarEncuestasDTO } from '../dtos/paginar-encuestas.dto';
+=======
 import { EncuestaDetalleDTO } from '../dtos/encuesta-detalle.dto';
+>>>>>>> main:src/modules/encuestas/controllers/encuestas.controller.ts
 
 @Controller('/encuestas')
 export class EncuestasController {
@@ -26,6 +30,11 @@ export class EncuestasController {
     @Query() dto: BuscarEncuestaDTO,
   ): Promise<EncuestaDetalleDTO> {
     return await this.encuestasService.buscarEncuesta(id, dto.codigo, dto.tipo);
+  }
+
+  @Get()
+  async listarEncuestas(@Query() dto: PaginarEncuestasDTO) {
+    return this.encuestasService.obtenerEncuestasPaginadas(dto);
   }
 
   @Post()
