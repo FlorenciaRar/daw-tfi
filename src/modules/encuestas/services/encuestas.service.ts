@@ -10,7 +10,11 @@ import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
 import { Pregunta } from '../entities/pregunta.entity';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
+<<<<<<< HEAD:backend/src/modules/encuestas/services/encuestas.service.ts
 import { PaginarEncuestasDTO } from '../dtos/paginar-encuestas.dto';
+=======
+import { EncuestaDetalleDTO } from '../dtos/encuesta-detalle.dto';
+>>>>>>> main:src/modules/encuestas/services/encuestas.service.ts
 
 @Injectable()
 export class EncuestasService {
@@ -25,7 +29,7 @@ export class EncuestasService {
     id: number,
     codigo: string,
     tipoCodigo: TipoCodigoEnum.RESPUESTA | TipoCodigoEnum.RESULTADOS,
-  ): Promise<Encuesta> {
+  ): Promise<EncuestaDetalleDTO> {
     const query = this.encuestasRepository
       .createQueryBuilder('encuesta')
       .innerJoinAndSelect('encuesta.preguntas', 'pregunta')
@@ -54,7 +58,17 @@ export class EncuestasService {
       throw new BadRequestException('Datos de encuesta no válidos');
     }
 
-    return encuesta;
+    return {
+      id: encuesta.id,
+      nombre: encuesta.nombre,
+      estado: encuesta.estado,
+      preguntas: encuesta.preguntas,
+      codigoRespuesta: encuesta.codigoRespuesta,
+      codigoResultados:
+        tipoCodigo === TipoCodigoEnum.RESULTADOS
+          ? encuesta.codigoResultados
+          : undefined, // omite si no queremos que exista
+    };
   }
 
   async crearEncuesta(dto: CrearEncuestaDTO): Promise<{
