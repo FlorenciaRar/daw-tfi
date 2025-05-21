@@ -3,6 +3,7 @@ import { RespuestasService } from '../services/respuestas.service';
 import { CrearRespuestaDTO } from '../dtos/crear-respuesta-dto';
 import { BuscarEncuestaDTO } from 'src/modules/encuestas/dtos/buscar-encuesta-dto';
 import { PaginarRespuestasDTO } from '../dtos/pagina-respuestas.dto';
+import { Respuesta } from '../entities/respuesta.entity';
 
 @Controller('/respuestas')
 export class RespuestasController {
@@ -11,31 +12,63 @@ export class RespuestasController {
   @Get(':id')
   async obtenerResultadosEncuesta(
     @Param('id') idEncuesta: number,
-    @Query() query: BuscarEncuestaDTO,
-  ): Promise<any[]> {
+    @Query() dto: BuscarEncuestaDTO,
+  ): Promise<{
+    id: number;
+    nombre: string;
+    preguntas: {
+      id: number;
+      texto: string;
+      tipo: string;
+      respuestasAbiertas: { id: number; texto: string }[];
+      respuestasOpciones: {
+        id: number;
+        idOpcion: number;
+        textoOpcion: string;
+      }[];
+      totalRespuestas: number;
+    }[];
+  }> {
     return await this.respuestasService.obtenerRespuestasPorEncuesta(
       idEncuesta,
-      query,
+      dto,
     );
   }
 
   @Get()
-  async listarRespuestas(@Query() dto: PaginarRespuestasDTO) {
+  async listarRespuestas(@Query() dto: PaginarRespuestasDTO): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    data: Respuesta[];
+    message: string;
+  }> {
     return await this.respuestasService.obtenerRespuestasPaginadas(dto);
   }
 
-  @Get(':id/paginadas') //se agrega metodo para paginar respuestas por encuesta
+  @Get(':id/paginadas')
   async obtenerRespuestasPaginadasPorEncuesta(
     @Param('id') idEncuesta: number,
-    @Query('codigo') codigo: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-  ): Promise<any> {
+    @Query() dtoEncuesta: BuscarEncuestaDTO,
+    @Query() dtoPaginacion: PaginarRespuestasDTO,
+  ): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    data: {
+      pregunta: {
+        id: number;
+        texto: string;
+      };
+      respuesta: string;
+    }[];
+    message: string;
+  }> {
     return await this.respuestasService.obtenerRespuestasPaginadasPorEncuesta(
       idEncuesta,
-      codigo,
-      page,
-      limit,
+      dtoEncuesta.codigo,
+      dtoPaginacion.page,
+      dtoPaginacion.limit,
     );
   }
 
@@ -44,7 +77,12 @@ export class RespuestasController {
     @Param('id') id: number,
     @Query() dtoEncuesta: BuscarEncuestaDTO,
     @Body() dtoRespuesta: CrearRespuestaDTO,
-  ): Promise<any> {
+  ): Promise<{
+    id: number;
+    encuesta: { id: number; titulo: string };
+    respuestasAbiertas: { id: number; texto: string; idPregunta: number }[];
+    respuestasOpciones: { id: number; idOpcion: number }[];
+  }> {
     return await this.respuestasService.crearRespuesta(
       id,
       dtoEncuesta,

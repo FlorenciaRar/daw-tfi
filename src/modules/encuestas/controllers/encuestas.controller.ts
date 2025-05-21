@@ -14,11 +14,8 @@ import { CrearEncuestaDTO } from '../dtos/crear-encuesta-dto';
 import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
-<<<<<<< HEAD:backend/src/modules/encuestas/controllers/encuestas.controller.ts
-import { PaginarEncuestasDTO } from '../dtos/paginar-encuestas.dto';
-=======
 import { EncuestaDetalleDTO } from '../dtos/encuesta-detalle.dto';
->>>>>>> main:src/modules/encuestas/controllers/encuestas.controller.ts
+import { PaginarEncuestasDTO } from '../dtos/paginar-encuestas.dto';
 
 @Controller('/encuestas')
 export class EncuestasController {
@@ -33,8 +30,14 @@ export class EncuestasController {
   }
 
   @Get()
-  async listarEncuestas(@Query() dto: PaginarEncuestasDTO) {
-    return this.encuestasService.obtenerEncuestasPaginadas(dto);
+  async listarEncuestas(@Query() dto: PaginarEncuestasDTO): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    data: Encuesta[];
+    message: string;
+  }> {
+    return await this.encuestasService.obtenerEncuestasPaginadas(dto);
   }
 
   @Post()
@@ -64,7 +67,7 @@ export class EncuestasController {
     @Param('id') id: number,
     @Query() dtoBuscarEncuesta: BuscarEncuestaDTO,
     @Body() dtoPreguntas: EliminarPreguntaDTO,
-  ): Promise<any> {
+  ): Promise<{ eliminadas: number[] }> {
     return await this.encuestasService.eliminarPreguntas(
       id,
       dtoBuscarEncuesta,

@@ -17,13 +17,19 @@ export class RespuestasService {
     private respuestasRepository: Repository<Respuesta>,
   ) {}
 
-  async obtenerRespuestasPaginadas(dto: PaginarRespuestasDTO) {
+  async obtenerRespuestasPaginadas(dto: PaginarRespuestasDTO): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    data: Respuesta[];
+    message: string;
+  }> {
     const { page = 1, limit = 10 } = dto;
 
     const [respuestas, total] = await this.respuestasRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
-      relations: ['encuesta'], // si querés mostrar datos de la encuesta también
+      relations: ['encuesta'],
       order: {
         id: 'ASC',
       },
@@ -42,13 +48,23 @@ export class RespuestasService {
   }
 
   async obtenerRespuestasPaginadasPorEncuesta(
-    //se agrega metodo para paginar respuestas por encuesta)
     idEncuesta: number,
     codigo: string,
     page: number = 1,
     limit: number = 10,
-  ): Promise<any> {
-    // Verificar que el código sea válido
+  ): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    data: {
+      pregunta: {
+        id: number;
+        texto: string;
+      };
+      respuesta: string;
+    }[];
+    message: string;
+  }> {
     const encuesta = await this.encuestasService.buscarEncuesta(
       idEncuesta,
       codigo,
@@ -115,7 +131,22 @@ export class RespuestasService {
   async obtenerRespuestasPorEncuesta(
     idEncuesta: number,
     dtoEncuesta: BuscarEncuestaDTO,
-  ): Promise<any> {
+  ): Promise<{
+    id: number;
+    nombre: string;
+    preguntas: {
+      id: number;
+      texto: string;
+      tipo: string;
+      respuestasAbiertas: { id: number; texto: string }[];
+      respuestasOpciones: {
+        id: number;
+        idOpcion: number;
+        textoOpcion: string;
+      }[];
+      totalRespuestas: number;
+    }[];
+  }> {
     const encuesta = await this.encuestasService.buscarEncuesta(
       idEncuesta,
       dtoEncuesta.codigo,

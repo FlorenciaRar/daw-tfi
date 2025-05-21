@@ -10,11 +10,8 @@ import { ModificarEncuestaDTO } from '../dtos/modificar-encuesta-dto';
 import { Pregunta } from '../entities/pregunta.entity';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
-<<<<<<< HEAD:backend/src/modules/encuestas/services/encuestas.service.ts
-import { PaginarEncuestasDTO } from '../dtos/paginar-encuestas.dto';
-=======
 import { EncuestaDetalleDTO } from '../dtos/encuesta-detalle.dto';
->>>>>>> main:src/modules/encuestas/services/encuestas.service.ts
+import { PaginarEncuestasDTO } from '../dtos/paginar-encuestas.dto';
 
 @Injectable()
 export class EncuestasService {
@@ -67,7 +64,7 @@ export class EncuestasService {
       codigoResultados:
         tipoCodigo === TipoCodigoEnum.RESULTADOS
           ? encuesta.codigoResultados
-          : undefined, // omite si no queremos que exista
+          : undefined,
     };
   }
 
@@ -91,7 +88,13 @@ export class EncuestasService {
     };
   }
 
-  async obtenerEncuestasPaginadas(dto: PaginarEncuestasDTO): Promise<any> {
+  async obtenerEncuestasPaginadas(dto: PaginarEncuestasDTO): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    data: Encuesta[];
+    message: string;
+  }> {
     const { page = 1, limit = 10 } = dto;
 
     console.log('Parámetros recibidos:', { page, limit });
