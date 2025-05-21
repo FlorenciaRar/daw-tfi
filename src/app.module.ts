@@ -27,7 +27,7 @@ import { ReportesModule } from './modules/reportes/reportes.module';
         password: configService.get('database.password'),
         port: configService.get('database.port'),
         autoLoadEntities: true,
-        syncronize: true,
+        synchronize: true,
         logging: configService.get('database.logging'),
         logger: configService.get('database.logger'),
       }),
