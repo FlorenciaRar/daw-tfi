@@ -96,18 +96,7 @@ export class ReportesService {
     try {
       const csv = unparse(datos, { header: true });
 
-      const directory = path.join(__dirname, '../../../reportes-csv');
-      if (!fs.existsSync(directory)) {
-        fs.mkdirSync(directory, { recursive: true });
-      }
-
-      const filePath = path.join(
-        directory,
-        `respuestas_encuesta_${idEncuesta}.csv`,
-      );
-      fs.writeFileSync(filePath, csv);
-
-      return filePath;
+      return csv;
     } catch (error) {
       console.error('Error al generar el CSV:', error);
       throw new InternalServerErrorException(
