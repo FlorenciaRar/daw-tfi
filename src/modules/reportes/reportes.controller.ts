@@ -18,16 +18,19 @@ export class ReportesController {
     // Por eso el decorador @Res y el try catch. ya que no se van a manejar errores automaticamente por nest
     //sino de manera manual
     try {
-      const filePath = await this.reportesService.generarReporteCSV(
+      const csv = await this.reportesService.generarReporteCSV(
         idEncuesta,
         dto.codigo,
         dto.tipo,
       );
-      res.download(filePath, `respuestas_encuesta_${idEncuesta}.csv`, (err) => {
-        if (err) {
-          res.status(500).send('Error al generar el reporte');
-        }
-      });
+
+      // Enviar CSV directamente
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="respuestas_encuesta_${idEncuesta}.csv"`,
+      );
+      res.send(csv);
     } catch (error) {
       console.error('Error al generar reporte CSV:', error);
       // Si el error es de tipo "Error" lanzado por el servicio, pasamos el mensaje original
