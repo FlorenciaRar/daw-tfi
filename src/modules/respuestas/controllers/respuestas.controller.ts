@@ -49,8 +49,7 @@ export class RespuestasController {
   @Get(':id/paginadas')
   async obtenerRespuestasPaginadasPorEncuesta(
     @Param('id') idEncuesta: number,
-    @Query() dtoEncuesta: BuscarEncuestaDTO,
-    @Query() dtoPaginacion: PaginarRespuestasDTO,
+    @Query() dto: PaginarRespuestasDTO, // Usar el nuevo DTO combinado
   ): Promise<{
     total: number;
     page: number;
@@ -64,14 +63,15 @@ export class RespuestasController {
     }[];
     message: string;
   }> {
+    const { codigo, page, limit } = dto;
+
     return await this.respuestasService.obtenerRespuestasPaginadasPorEncuesta(
       idEncuesta,
-      dtoEncuesta.codigo,
-      dtoPaginacion.page,
-      dtoPaginacion.limit,
+      codigo,
+      page,
+      limit,
     );
   }
-
   @Post(':id')
   async crearRespuesta(
     @Param('id') id: number,

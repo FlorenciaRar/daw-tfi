@@ -1,7 +1,10 @@
-import { IsOptional, IsPositive, Min } from 'class-validator';
+import { IsOptional, IsPositive, Min, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class PaginarRespuestasDTO {
+  @IsString()
+  codigo: string;
+
   @IsOptional()
   @Type(() => Number)
   @IsPositive()
