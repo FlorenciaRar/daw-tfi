@@ -3,6 +3,8 @@ import { RespuestasService } from '../services/respuestas.service';
 import { CrearRespuestaDTO } from '../dtos/crear-respuesta-dto';
 import { BuscarEncuestaDTO } from 'src/modules/encuestas/dtos/buscar-encuesta-dto';
 import { PaginarRespuestasDTO } from '../dtos/pagina-respuestas.dto';
+import { RespuestaPaginadaDTO } from '../dtos/respuesta-paginada.dto';
+import { RespuestaFormularioDTO } from '../dtos/respuesta-formulario.dto';
 import { Respuesta } from '../entities/respuesta.entity';
 
 @Controller('/respuestas')
@@ -49,20 +51,8 @@ export class RespuestasController {
   @Get(':id/paginadas')
   async obtenerRespuestasPaginadasPorEncuesta(
     @Param('id') idEncuesta: number,
-    @Query() dto: PaginarRespuestasDTO, // Usar el nuevo DTO combinado
-  ): Promise<{
-    total: number;
-    page: number;
-    limit: number;
-    data: {
-      pregunta: {
-        id: number;
-        texto: string;
-      };
-      respuesta: string;
-    }[];
-    message: string;
-  }> {
+    @Query() dto: PaginarRespuestasDTO,
+  ): Promise<RespuestaPaginadaDTO> {
     const { codigo, page, limit } = dto;
 
     return await this.respuestasService.obtenerRespuestasPaginadasPorEncuesta(
