@@ -82,7 +82,17 @@ export class RespuestasService {
     }
 
     // Obtener las respuestas paginadas
-    const [respuestas, total] = await this.respuestasRepository.findAndCount({
+    const total = await this.respuestasRepository.count({
+      where: { encuesta: { id: idEncuesta } },
+    });
+
+    console.log(
+      'Consulta generada para count:',
+      this.respuestasRepository.createQueryBuilder().getSql(),
+    );
+    console.log('Total de respuestas:', total);
+
+    const respuestas = await this.respuestasRepository.find({
       where: { encuesta: { id: idEncuesta } },
       skip: (page - 1) * limit,
       take: limit,
@@ -96,6 +106,7 @@ export class RespuestasService {
       order: { id: 'ASC' },
     });
 
+    // Combinar respuestas abiertas y de opciones
     const data = respuestas.flatMap((respuesta) => {
       const respuestasAbiertas = respuesta.respuestasAbiertas.map((ra) => ({
         pregunta: {
@@ -116,13 +127,16 @@ export class RespuestasService {
       return [...respuestasAbiertas, ...respuestasOpciones];
     });
 
+    // Aplicar el límite al arreglo combinado
+    const limitedData = data.slice(0, limit);
+
     return {
       total,
       page,
       limit,
-      data,
+      data: limitedData,
       message:
-        data.length > 0
+        limitedData.length > 0
           ? 'Respuestas encontradas'
           : 'No hay más respuestas para mostrar',
     };
