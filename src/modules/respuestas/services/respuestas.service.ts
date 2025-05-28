@@ -57,11 +57,11 @@ export class RespuestasService {
     page: number;
     limit: number;
     data: {
-      pregunta: {
-        id: number;
-        texto: string;
-      };
-      respuesta: string;
+      formularioId: number;
+      respuestas: {
+        pregunta: { id: number; texto: string };
+        respuesta: string;
+      }[];
     }[];
     message: string;
   }> {
@@ -81,16 +81,9 @@ export class RespuestasService {
       };
     }
 
-    // Obtener las respuestas paginadas
     const total = await this.respuestasRepository.count({
       where: { encuesta: { id: idEncuesta } },
     });
-
-    console.log(
-      'Consulta generada para count:',
-      this.respuestasRepository.createQueryBuilder().getSql(),
-    );
-    console.log('Total de respuestas:', total);
 
     const respuestas = await this.respuestasRepository.find({
       where: { encuesta: { id: idEncuesta } },
@@ -106,8 +99,7 @@ export class RespuestasService {
       order: { id: 'ASC' },
     });
 
-    // Combinar respuestas abiertas y de opciones
-    const data = respuestas.flatMap((respuesta) => {
+    const data = respuestas.map((respuesta) => {
       const respuestasAbiertas = respuesta.respuestasAbiertas.map((ra) => ({
         pregunta: {
           id: ra.pregunta.id,
@@ -124,19 +116,19 @@ export class RespuestasService {
         respuesta: ro.opcion.texto,
       }));
 
-      return [...respuestasAbiertas, ...respuestasOpciones];
+      return {
+        formularioId: respuesta.id,
+        respuestas: [...respuestasAbiertas, ...respuestasOpciones],
+      };
     });
-
-    // Aplicar el límite al arreglo combinado
-    const limitedData = data.slice(0, limit);
 
     return {
       total,
       page,
       limit,
-      data: limitedData,
+      data,
       message:
-        limitedData.length > 0
+        data.length > 0
           ? 'Respuestas encontradas'
           : 'No hay más respuestas para mostrar',
     };
