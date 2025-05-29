@@ -19,5 +19,5 @@ export class EncuestaDetalleDTO {
   codigoRespuesta: string;
 
   @ApiPropertyOptional()
-  codigoResultados?: string; //Solo presente si tipo === RESULTADOS
+  codigoResultados?: string;
 }

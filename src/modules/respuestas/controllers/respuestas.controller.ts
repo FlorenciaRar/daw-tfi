@@ -4,7 +4,6 @@ import { CrearRespuestaDTO } from '../dtos/crear-respuesta-dto';
 import { BuscarEncuestaDTO } from 'src/modules/encuestas/dtos/buscar-encuesta-dto';
 import { PaginarRespuestasDTO } from '../dtos/pagina-respuestas.dto';
 import { RespuestaPaginadaDTO } from '../dtos/respuesta-paginada.dto';
-import { RespuestaFormularioDTO } from '../dtos/respuesta-formulario.dto';
 import { Respuesta } from '../entities/respuesta.entity';
 
 @Controller('/respuestas')

@@ -3,9 +3,7 @@ import {
   ArrayMinSize,
   ArrayNotEmpty,
   IsArray,
-  IsNotEmpty,
   IsOptional,
-  IsString,
   ValidateNested,
 } from 'class-validator';
 import { CrearRespuestaAbiertaDTO } from './crear-respuesta-abierta-dto';
