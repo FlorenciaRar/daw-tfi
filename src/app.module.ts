@@ -14,6 +14,7 @@ import { ReportesModule } from './modules/reportes/reportes.module';
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true,
+      //Aca le decimos a nest que si estamos en produccion ignore el .env
       ignoreEnvFile: process.env.NODE_ENV === 'production',
     }),
     TypeOrmModule.forRootAsync({

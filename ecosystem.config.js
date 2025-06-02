@@ -1,6 +1,5 @@
 module.exports = {
   apps: [
-    //cada objeto van a ser las aplicaciones que queremos configurar con este archivo de config
     {
       name: 'encuestas',
       script: 'dist/main.js',
