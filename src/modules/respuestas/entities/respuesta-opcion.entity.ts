@@ -1,6 +1,5 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Respuesta } from './respuesta.entity';
-// import { Pregunta } from 'src/modules/encuestas/entities/pregunta.entity';
 import { Opcion } from 'src/modules/encuestas/entities/opcion.entity';
 
 @Entity({ name: 'respuestas_opciones' })

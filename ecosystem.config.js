@@ -1,6 +1,5 @@
 module.exports = {
   apps: [
-    //cada objeto van a ser las aplicaciones que queremos configurar con este archiv de config
     {
       name: 'encuestas',
       script: 'dist/main.js',
@@ -12,9 +11,9 @@ module.exports = {
         DB_HOST: 'localhost',
         DB_PORT: 5432,
         DB_USER: 'postgres', //lo cambie por el mio
-        DB_PASSWORD: 'Chiste2704', //lo cambie por el mio
+        DB_PASSWORD: 'pongan su contraseña', //lo cambie por el mio
         DB_NAME: 'encuestas',
-        DB_LOGGING: 'false', //typeORM no imprima los logs de consultas
+        DB_LOGGING: 'false', //typeORM no imprima los logs de consultas en modo prod
         GLOBAL_PREFIX: 'api',
         SWAGGER_HABILITADO: false,
       },

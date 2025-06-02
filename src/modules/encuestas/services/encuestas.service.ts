@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Encuesta } from '../entities/encuesta.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Not, Repository, UpdateResult } from 'typeorm';
 import { TipoCodigoEnum } from '../enums/tipo-codigo.enum';
 import { CrearEncuestaDTO } from '../dtos/crear-encuesta-dto';
 import { v4 } from 'uuid';
@@ -11,6 +11,7 @@ import { Pregunta } from '../entities/pregunta.entity';
 import { TipoEstadoEnum } from '../enums/tipo-estado.enum';
 import { EliminarPreguntaDTO } from '../dtos/eliminar-pregunta-dto';
 import { EncuestaDetalleDTO } from '../dtos/encuesta-detalle.dto';
+import { PaginarEncuestasDTO } from '../dtos/paginar-encuestas.dto';
 
 @Injectable()
 export class EncuestasService {
@@ -63,7 +64,7 @@ export class EncuestasService {
       codigoResultados:
         tipoCodigo === TipoCodigoEnum.RESULTADOS
           ? encuesta.codigoResultados
-          : undefined, // omite si no queremos que exista
+          : undefined,
     };
   }
 
@@ -84,6 +85,39 @@ export class EncuestasService {
       id: encuestaGuardada.id,
       codigoRespuesta: encuestaGuardada.codigoRespuesta,
       codigoResultados: encuestaGuardada.codigoResultados,
+    };
+  }
+
+  async obtenerEncuestasPaginadas(dto: PaginarEncuestasDTO): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    data: Encuesta[];
+    message: string;
+  }> {
+    const { page = 1, limit = 10 } = dto;
+
+    console.log('Parámetros recibidos:', { page, limit });
+
+    const [data, total] = await this.encuestasRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { id: 'ASC' },
+      where: {
+        estado: Not(TipoEstadoEnum.ELIMINADO),
+      },
+      relations: ['preguntas', 'preguntas.opciones'],
+    });
+
+    return {
+      total,
+      page,
+      limit,
+      data,
+      message:
+        data.length > 0
+          ? 'Encuestas encontradas'
+          : 'No hay más encuestas para mostrar',
     };
   }
 
